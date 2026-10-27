@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <!-- The app shell. Everything visible is built by js/main.js; this file holds no inline
+       script or style so the Content-Security-Policy can forbid both. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'; require-trusted-types-for 'script'; trusted-types 'none'">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="referrer" content="no-referrer">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#fdfdfe" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#14161d" media="(prefers-color-scheme: dark)">
+  <title>silva-mentis</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="css/fonts.css">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/outline.css">
+  <link rel="stylesheet" href="css/panels.css">
+  <link rel="stylesheet" href="css/views.css">
+  <link rel="modulepreload" href="js/main.js">
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+  <div id="app" class="boot" aria-live="polite">
+    <p class="boot-message">Opening silva-mentis…</p>
+  </div>
+  <noscript><p class="boot-message">silva-mentis needs JavaScript: your notes are decrypted in this browser.</p></noscript>
+</body>
+</html>

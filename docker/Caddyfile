@@ -1,0 +1,6 @@
+# Caddy terminates HTTPS (certificates from Let's Encrypt, renewed automatically) and forwards
+# requests to the silva-mentis container. DOMAIN comes from the .env file.
+{$DOMAIN} {
+	encode zstd gzip
+	reverse_proxy silva-mentis:80
+}

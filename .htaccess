@@ -1,0 +1,19 @@
+# silva-mentis — only used when the WHOLE project folder sits inside the web root
+# (for hosts where the web root cannot point at public/).
+# Every request is forwarded into public/; nothing else is reachable.
+DirectoryIndex index.php
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule ^public/ - [L]
+  RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+# Without mod_rewrite, the private folders are still closed by their own .htaccess files
+# and index.php redirects visitors to public/.
+<FilesMatch "^(\.|composer\.|package\.json|.*\.md$|LICENSE|Dockerfile|docker-compose\.yml)">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+</FilesMatch>

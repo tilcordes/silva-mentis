@@ -1,0 +1,94 @@
+/* Design tokens: every color, font and size the app uses. Light and dark themes switch tokens
+   only. The palette: a near-white writing surface, ink with an indigo bias, and one accent
+   ("thread") that marks what can be followed. Yellow is reserved for highlights in the notes. */
+
+:root {
+  color-scheme: light;
+  --paper: #fdfdfe;         /* the writing surface */
+  --shelf: #f3f4f8;         /* navigation, sidebar, popovers */
+  --ink: #1b1e2b;           /* note text */
+  --ink-2: #535a6d;         /* secondary text */
+  --ink-3: #8f95a7;         /* brackets, counts, bullets */
+  --rule: #e1e4ec;          /* hairlines, guide lines */
+  --thread: #3949ab;        /* links and the single accent */
+  --thread-wash: #e8ebfa;
+  --on-thread: #ffffff;
+  --tag: #848a9e;           /* hashtags */
+  --mark: #f8e98f;          /* highlights */
+  --mark-ink: #1b1e2b;
+  --caution: #8a5300;       /* test-mode banner, warnings */
+  --caution-wash: #fcefd6;
+  --danger: #b3261e;
+  --select: #dfe4fb;        /* selected blocks */
+  --scrim: rgb(27 30 43 / .32);
+  --shadow-float: 0 1px 2px rgb(27 30 43 / .06), 0 10px 30px rgb(27 30 43 / .12);
+
+  --font-note: "Literata", Georgia, "Times New Roman", serif;
+  --font-ui: "Source Sans 3", "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+  --t-xs: 0.75rem;
+  --t-sm: 0.8125rem;
+  --t-ui: 0.90625rem;
+  --t-body: 1rem;
+  --t-note: 1.03125rem;
+  --t-lg: 1.25rem;
+  --t-xl: 1.625rem;
+  --t-title: 2.125rem;
+
+  --nav-width: 236px;
+  --side-width: 360px;
+  --column: 41rem;
+  --radius: 7px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper: #14161d;
+    --shelf: #1a1d26;
+    --ink: #e1e4ec;
+    --ink-2: #a2a8b9;
+    --ink-3: #686e81;
+    --rule: #282c37;
+    --thread: #9daaf6;
+    --thread-wash: #222946;
+    --on-thread: #10131c;
+    --tag: #7f8599;
+    --mark: #5c4f12;
+    --mark-ink: #f5eabb;
+    --caution: #f0b65e;
+    --caution-wash: #2f240f;
+    --danger: #f2b8b5;
+    --select: #252c4d;
+    --scrim: rgb(0 0 0 / .5);
+    --shadow-float: 0 1px 2px rgb(0 0 0 / .5), 0 12px 32px rgb(0 0 0 / .45);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #14161d;
+  --shelf: #1a1d26;
+  --ink: #e1e4ec;
+  --ink-2: #a2a8b9;
+  --ink-3: #686e81;
+  --rule: #282c37;
+  --thread: #9daaf6;
+  --thread-wash: #222946;
+  --on-thread: #10131c;
+  --tag: #7f8599;
+  --mark: #5c4f12;
+  --mark-ink: #f5eabb;
+  --caution: #f0b65e;
+  --caution-wash: #2f240f;
+  --danger: #f2b8b5;
+  --select: #252c4d;
+  --scrim: rgb(0 0 0 / .5);
+  --shadow-float: 0 1px 2px rgb(0 0 0 / .5), 0 12px 32px rgb(0 0 0 / .45);
+}
+
+/* Settings → Font for notes → Sans-serif */
+:root[data-note-font="sans"] {
+  --font-note: var(--font-ui);
+}

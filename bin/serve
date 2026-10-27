@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Starts silva-mentis with PHP's built-in web server, for local use and trying things out.
+#
+#   bin/serve          normal mode (login + encryption)   on http://localhost:8080
+#   bin/serve test     test version (no login, no encryption) on http://localhost:8081
+#   PORT=9000 bin/serve test
+#
+# The built-in server is meant for one person on one machine. A real installation needs a
+# web server with HTTPS (see README.md).
+
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+
+if [ -n "${PHP:-}" ]; then
+  PHP_BIN="$PHP"
+elif [ -x "$ROOT/.dev/bin/php" ]; then
+  PHP_BIN="$ROOT/.dev/bin/php"
+else
+  PHP_BIN="$(command -v php || true)"
+fi
+if [ -z "$PHP_BIN" ]; then
+  echo "PHP was not found. Install PHP 8.2+ or set PHP=/path/to/php." >&2
+  exit 1
+fi
+
+mode="${1:-normal}"
+case "$mode" in
+  normal) port="${PORT:-8080}"; export SILVA_MENTIS_MODE=normal ;;
+  test)   port="${PORT:-8081}"; export SILVA_MENTIS_MODE=test ;;
+  *) echo "Usage: bin/serve [normal|test]" >&2; exit 2 ;;
+esac
+
+echo "silva-mentis ($mode mode) on http://localhost:$port   — stop with Ctrl+C"
+exec "$PHP_BIN" -S "localhost:$port" -t "$ROOT/public"

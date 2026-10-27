@@ -1,0 +1,13 @@
+# Not needed inside the container image.
+.git
+.dev
+.env
+tests
+bin
+docker-compose.yml
+Dockerfile
+.dockerignore
+data/*.sqlite*
+data/setup-token-*
+config/config.php
+node_modules

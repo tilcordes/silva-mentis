@@ -1,0 +1,39 @@
+# silva-mentis with automatic HTTPS.
+#
+#   1. Point your domain's DNS (A/AAAA record) at this server; open ports 80 and 443.
+#   2. echo "DOMAIN=notes.example.com" > .env
+#   3. docker compose up -d
+#
+# Your encrypted notes are in the volume "silva-mentis-data".
+
+services:
+  silva-mentis:
+    build: .
+    image: silva-mentis:latest
+    restart: unless-stopped
+    environment:
+      # Requests arrive through Caddy on the internal Docker network; believe its
+      # X-Forwarded-For/-Proto headers. This container publishes no port of its own.
+      SILVA_MENTIS_TRUSTED_PROXIES: "172.16.0.0/12,10.0.0.0/8,192.168.0.0/16"
+    volumes:
+      - silva-mentis-data:/var/www/silva-mentis/data
+
+  caddy:
+    image: caddy:2.8
+    restart: unless-stopped
+    depends_on:
+      - silva-mentis
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN:?Set DOMAIN in the .env file, e.g. DOMAIN=notes.example.com}
+    volumes:
+      - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+volumes:
+  silva-mentis-data:
+  caddy-data:
+  caddy-config:

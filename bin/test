@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+# Runs the test suites of silva-mentis.
+#
+#   bin/test              PHP, JavaScript and end-to-end tests
+#   bin/test php          only the PHP tests      (extra arguments filter test names)
+#   bin/test js           only the JavaScript unit tests
+#   bin/test e2e          only the end-to-end API tests (starts php -S)
+#   bin/test browser      only the browser tests (headless Firefox, optional)
+#   bin/test all          everything, including the browser tests
+#
+# PHP is looked up in this order: $PHP, .dev/bin/php (a local copy), php on the PATH.
+# All temporary files go to tests/.tmp/ so nothing outside the project folder is touched.
+
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT"
+
+export TMPDIR="$ROOT/tests/.tmp"
+mkdir -p "$TMPDIR"
+
+find_php() {
+  if [ -n "${PHP:-}" ]; then
+    echo "$PHP"
+  elif [ -x "$ROOT/.dev/bin/php" ]; then
+    echo "$ROOT/.dev/bin/php"
+  elif command -v php >/dev/null 2>&1; then
+    command -v php
+  fi
+}
+
+PHP_BIN="$(find_php)"
+export PHP="$PHP_BIN"
+
+require_php() {
+  if [ -z "$PHP_BIN" ]; then
+    echo "PHP was not found. Install PHP 8.2+ or set PHP=/path/to/php." >&2
+    exit 1
+  fi
+}
+
+run_php() {
+  require_php
+  echo "── PHP tests ($("$PHP_BIN" -r 'echo PHP_VERSION;'))"
+  "$PHP_BIN" tests/php/run.php "$@"
+}
+
+run_js() {
+  echo "── JavaScript unit tests"
+  node --test 'tests/js/*.test.js'
+}
+
+run_e2e() {
+  require_php
+  echo "── End-to-end tests"
+  node --test --test-concurrency=1 'tests/e2e/*.test.js'
+}
+
+run_browser() {
+  require_php
+  echo "── Browser tests"
+  node --test --test-concurrency=1 'tests/browser/*.test.js'
+}
+
+suite="${1:-default}"
+if [ $# -gt 0 ]; then shift; fi
+
+case "$suite" in
+  php)     run_php "$@" ;;
+  js)      run_js ;;
+  e2e)     run_e2e ;;
+  browser) run_browser ;;
+  all)     run_php; run_js; run_e2e; run_browser ;;
+  default) run_php; run_js; run_e2e ;;
+  *)
+    echo "Unknown suite '$suite'. Use php, js, e2e, browser or all." >&2
+    exit 2
+    ;;
+esac
