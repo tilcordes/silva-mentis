@@ -34,8 +34,12 @@ export class TouchToolbar {
       const tool = event.target.closest('[data-tool]')?.dataset.tool;
       if (tool) app.editor.command(tool);
     });
-    // Stay above the on-screen keyboard.
-    window.visualViewport?.addEventListener('resize', () => this.position());
+    // Stay above the on-screen keyboard. When the keyboard opens or changes size, bring the
+    // edited bullet back above it (not on scroll: that would fight a person scrolling to read).
+    window.visualViewport?.addEventListener('resize', () => {
+      this.position();
+      if (!this.element.hidden) app.editor.reveal();
+    });
     window.visualViewport?.addEventListener('scroll', () => this.position());
     document.body.append(this.element);
   }
@@ -44,16 +48,33 @@ export class TouchToolbar {
     if (!this.enabled) return;
     this.element.hidden = false;
     this.position();
+    this.app.editor.reveal();
   }
 
   hide() {
     this.element.hidden = true;
   }
 
+  /** How much of the bottom of the screen the toolbar covers (0 while it is hidden). */
+  get height() {
+    return this.element.hidden ? 0 : this.element.offsetHeight;
+  }
+
+  /**
+   * Puts the toolbar on top of the keyboard. Most phone browsers don't shrink the page for the
+   * keyboard, they only cover it. So the space keyboard and toolbar take is also published as
+   * --keyboard: the scroll areas add it below their content, which lets even the last bullet of
+   * a page scroll up above them (see BlockEditor.reveal()).
+   */
   position() {
     const viewport = window.visualViewport;
-    if (!viewport || this.element.hidden) return;
-    const bottom = window.innerHeight - (viewport.height + viewport.offsetTop);
-    this.element.style.bottom = `${Math.max(0, bottom)}px`;
+    if (!this.enabled || !viewport) return;
+    const keyboard = Math.max(0, Math.round(window.innerHeight - (viewport.height + viewport.offsetTop)));
+    this.element.style.bottom = `${keyboard}px`;
+    if (this.element.hidden) {
+      document.documentElement.style.removeProperty('--keyboard');
+      return;
+    }
+    document.documentElement.style.setProperty('--keyboard', `${keyboard + this.height}px`);
   }
 }

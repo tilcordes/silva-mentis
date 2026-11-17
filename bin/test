@@ -9,6 +9,7 @@
 #   bin/test all          everything, including the browser tests
 #
 # PHP is looked up in this order: $PHP, .dev/bin/php (a local copy), php on the PATH.
+# Node (22 or newer) is looked up in .dev/node/bin (a local copy), then on the PATH.
 # All temporary files go to tests/.tmp/ so nothing outside the project folder is touched.
 
 set -euo pipefail
@@ -31,6 +32,10 @@ find_php() {
 
 PHP_BIN="$(find_php)"
 export PHP="$PHP_BIN"
+
+if [ -x "$ROOT/.dev/node/bin/node" ]; then
+  export PATH="$ROOT/.dev/node/bin:$PATH"
+fi
 
 require_php() {
   if [ -z "$PHP_BIN" ]; then

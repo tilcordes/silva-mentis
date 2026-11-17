@@ -199,6 +199,20 @@ export class Firefox {
     writeFileSync(path, Buffer.from(data, 'base64'));
   }
 
+  /**
+   * Runs fn in every page loaded from now on, before the page's own scripts.
+   * @param {Function} fn
+   * @returns {Promise<string>} the id for removePreloadScript()
+   */
+  async addPreloadScript(fn) {
+    const { script } = await this.send('script.addPreloadScript', { functionDeclaration: fn.toString() });
+    return script;
+  }
+
+  async removePreloadScript(id) {
+    await this.send('script.removePreloadScript', { script: id });
+  }
+
   async setViewport(width, height) {
     await this.send('browsingContext.setViewport', { context: this.context, viewport: { width, height } });
   }

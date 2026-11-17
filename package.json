@@ -1,12 +1,12 @@
 {
   "name": "silva-mentis",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "The forest of your thinking: self-hosted, end-to-end encrypted, associative markdown notes. This file only configures the test scripts; the app has no npm dependencies.",
   "type": "module",
   "license": "MIT",
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "scripts": {
     "test": "bin/test",

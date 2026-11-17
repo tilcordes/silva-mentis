@@ -4,6 +4,11 @@ All notable changes to silva-mentis. Version numbers follow
 [Semantic Versioning](https://semver.org): bug fixes raise the last number, new features the
 middle one, and changes that need action when updating (or break compatibility) the first one.
 
+## 1.0.1 (2026-11-17)
+
+- Phones and tablets: the bullet you are editing now always stays visible above the on-screen
+  keyboard, also when it is the last bullet of a page.
+
 ## 1.0.0 (2026-10-27)
 
 First public release.

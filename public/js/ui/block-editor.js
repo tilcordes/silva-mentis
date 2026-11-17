@@ -18,6 +18,9 @@ import { SuggestionMenu } from './suggestions.js';
 /** Characters that wrap a selection instead of replacing it. */
 const WRAPPERS = { '*': '*', _: '_', '=': '=', '^': '^', '~': '~', '`': '`', '[': ']', '(': ')', '"': '"' };
 
+/** Room kept between the caret's line and the keyboard (or the top of the screen), in pixels. */
+const REVEAL_MARGIN = 24;
+
 const SLASH_COMMANDS = [
   { id: 'today', label: 'Today' },
   { id: 'tomorrow', label: 'Tomorrow' },
@@ -118,6 +121,26 @@ export class BlockEditor {
     this.textarea.focus({ preventScroll: true });
     if (this.savedSelection) this.textarea.setSelectionRange(...this.savedSelection);
     row.scrollIntoView?.({ block: 'nearest' });
+    this.reveal();
+  }
+
+  /**
+   * On touch devices, scrolls the caret's line into the part of the screen that the on-screen
+   * keyboard and the touch toolbar leave free. scrollIntoView() can't do this: the keyboard only
+   * covers the page, so a bullet hidden behind it still counts as visible.
+   */
+  reveal() {
+    const toolbar = this.app.touchToolbar;
+    const viewport = window.visualViewport;
+    if (!toolbar?.enabled || !viewport || !this.target || !this.textarea.isConnected) return;
+    const scroller = this.textarea.closest('.main, .side-cards');
+    if (!scroller) return;
+    const box = scroller.getBoundingClientRect();
+    const top = Math.max(box.top, viewport.offsetTop) + REVEAL_MARGIN;
+    const bottom = Math.min(box.bottom, viewport.offsetTop + viewport.height) - toolbar.height - REVEAL_MARGIN;
+    const caret = caretRect(this.textarea, this.textarea.selectionEnd);
+    if (caret.bottom > bottom) scroller.scrollTop += caret.bottom - bottom;
+    else if (caret.top < top) scroller.scrollTop -= top - caret.top;
   }
 
   onBlur() {
@@ -178,6 +201,7 @@ export class BlockEditor {
     this.savedSelection = [caret, caret];
     this.commitText(history);
     this.autosize();
+    this.reveal();
     this.updateAutocomplete();
   }
 
@@ -195,6 +219,7 @@ export class BlockEditor {
     }
     this.commitText('typing');
     this.autosize();
+    this.reveal();
     this.updateAutocomplete();
   }
 

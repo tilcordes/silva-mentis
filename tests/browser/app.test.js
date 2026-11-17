@@ -211,3 +211,65 @@ test('drag a bullet into another block', { skip }, async () => {
   const child = await browser.eval(() => document.querySelector('.main .page > .blocks > li:nth-child(1) > .blocks > li > .row .content')?.textContent);
   assert.match(child, /Studio North/);
 });
+
+/**
+ * Runs in the page before the app (see addPreloadScript): the device has a finger as pointer and
+ * an on-screen keyboard that covers window.fakeKeyboard pixels. Like on real phones, only the
+ * visual viewport shrinks; the page itself keeps its size.
+ */
+function fakePhoneKeyboard() {
+  const real = window.visualViewport;
+  const viewport = new EventTarget();
+  window.fakeKeyboard = 0;
+  for (const name of ['width', 'offsetLeft', 'offsetTop', 'pageLeft', 'pageTop', 'scale']) {
+    Object.defineProperty(viewport, name, { get: () => real[name] });
+  }
+  Object.defineProperty(viewport, 'height', { get: () => real.height - window.fakeKeyboard });
+  Object.defineProperty(window, 'visualViewport', { configurable: true, get: () => viewport });
+  const matchMedia = window.matchMedia.bind(window);
+  const pointer = { '(pointer: coarse)': true, '(pointer: fine)': false };
+  window.matchMedia = (query) => (query in pointer ? { matches: pointer[query], media: query } : matchMedia(query));
+}
+
+test('on a phone, the bullet being edited stays above the keyboard', { skip }, async () => {
+  const preload = await browser.addPreloadScript(fakePhoneKeyboard);
+  try {
+    await browser.setViewport(390, 700);
+    await reload('#/daily');
+    await browser.waitFor(() => document.querySelector('.day .content'), { message: 'daily notes' });
+    // A new page has nothing below its bullets, so there is no content to scroll by either.
+    await browser.type('k', { modifiers: [KEYS.control] });
+    await browser.type(`Packing List${KEYS.down}`);
+    await browser.waitFor(() => document.querySelector('.palette .suggestion.create.sel'), { message: 'create entry' });
+    await browser.type(KEYS.enter);
+    await browser.waitFor(() => document.activeElement?.classList.contains('editor'), { message: 'editor on the new page' });
+    await browser.eval(() => {
+      window.fakeKeyboard = 300;
+      window.visualViewport.dispatchEvent(new Event('resize'));
+    });
+    await browser.type(Array.from({ length: 20 }, (_, i) => `Item ${i + 1}`).join(KEYS.enter));
+    await wait(100);
+    const place = await browser.eval(() => {
+      const editor = document.querySelector('.editor');
+      const toolbar = document.querySelector('.touch-toolbar');
+      return {
+        text: editor.value,
+        editorTop: editor.getBoundingClientRect().top,
+        editorBottom: editor.getBoundingClientRect().bottom,
+        mainTop: document.querySelector('.main').getBoundingClientRect().top,
+        toolbarShown: !toolbar.hidden,
+        toolbarTop: toolbar.getBoundingClientRect().top,
+        toolbarBottom: toolbar.getBoundingClientRect().bottom,
+        keyboardTop: window.visualViewport.offsetTop + window.visualViewport.height,
+      };
+    });
+    assert.equal(place.text, 'Item 20');
+    assert.ok(place.toolbarShown, 'the touch toolbar is shown');
+    assert.ok(Math.abs(place.toolbarBottom - place.keyboardTop) <= 1, `the toolbar sits on the keyboard (${JSON.stringify(place)})`);
+    assert.ok(place.editorBottom <= place.toolbarTop, `the edited bullet is above the toolbar (${JSON.stringify(place)})`);
+    assert.ok(place.editorTop >= place.mainTop, `the edited bullet is not scrolled off the top (${JSON.stringify(place)})`);
+  } finally {
+    await browser.removePreloadScript(preload);
+    await browser.setViewport(1280, 900);
+  }
+});
